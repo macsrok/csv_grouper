@@ -311,7 +311,7 @@ Document installation, command examples, arguments, matcher semantics, output be
 
 - [ ] **Step 2: Run full test suite**
 
-Run: `bundle exec rake spec`
+Run: `bundle exec rspec spec/`
 
 Expected: PASS.
 
