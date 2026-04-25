@@ -9,14 +9,17 @@ require "csv_grouping/csv_output"
 RSpec.describe CsvGrouping::CsvOutput do
   subject(:result) do
     described_class.write(
-      input_path: input_path,
-      matcher: matcher,
-      headers: headers,
-      rows: rows,
-      output_dir: output_dir
+      described_class::Request.new(
+        options: options,
+        headers: headers,
+        rows: rows
+      )
     )
   end
 
+  let(:options) do
+    Struct.new(:input_path, :matcher, :output_dir).new(input_path, matcher, output_dir)
+  end
   let(:matcher) { "same_email" }
   let(:headers) { %w[PersonId Name] }
   let(:rows) do

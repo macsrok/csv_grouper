@@ -3,56 +3,77 @@
 require "csv"
 require "fileutils"
 
+require "csv_grouping/output_path"
+
 module CsvGrouping
   # Writes the complete grouped CSV and prepares the stdout preview.
   class CsvOutput
+    # Values needed to write one grouped CSV output.
+    Request = Struct.new(:options, :headers, :rows, keyword_init: true) do
+      def input_path
+        options.input_path
+      end
+
+      def matcher
+        options.matcher
+      end
+
+      def output_dir
+        options.output_dir
+      end
+    end
+
     # File path and preview text produced by a CSV write operation.
     Result = Struct.new(:path, :preview, keyword_init: true)
 
-    def self.write(input_path:, matcher:, headers:, rows:, output_dir:)
-      new(input_path, matcher, headers, rows, output_dir).write
+    def self.write(request)
+      new(request).write
     end
 
-    def initialize(input_path, matcher, headers, rows, output_dir)
-      @input_path = input_path
-      @matcher = matcher
-      @headers = headers
-      @rows = rows
-      @output_dir = output_dir
+    def initialize(request)
+      @request = request
     end
 
     def write
-      FileUtils.mkdir_p(resolved_output_dir)
-      CSV.open(path, "w", write_headers: true, headers: @headers) do |csv|
-        @rows.each { |row| csv << row_values(row) }
-      end
+      FileUtils.mkdir_p(File.dirname(path))
+      CSV.open(path, "w", write_headers: true, headers: headers) { |csv| write_rows(csv, rows) }
 
       Result.new(path: path, preview: preview)
     end
 
     private
 
+    attr_reader :request
+
     def path
-      @path ||= File.join(resolved_output_dir, "#{input_basename}_#{@matcher}.csv")
-    end
-
-    def resolved_output_dir
-      @resolved_output_dir ||= File.expand_path(@output_dir || "outputs")
-    end
-
-    def input_basename
-      File.basename(@input_path, File.extname(@input_path))
+      @path ||= OutputPath.build(request)
     end
 
     def preview
       CSV.generate do |csv|
-        csv << @headers
-        @rows.last(100).each { |row| csv << row_values(row) }
+        csv << headers
+        write_rows(csv, rows.last(100))
       end
     end
 
+    def write_rows(csv, selected_rows)
+      selected_rows.each { |row| write_row(csv, row) }
+    end
+
+    def write_row(csv, row)
+      csv << row_values(row)
+    end
+
     def row_values(row)
-      @headers.map { |header| row[header] }
+      headers.map { |header| row[header] }
+    end
+
+    def headers
+      request.headers
+    end
+
+    def rows
+      request.rows
     end
   end
 end

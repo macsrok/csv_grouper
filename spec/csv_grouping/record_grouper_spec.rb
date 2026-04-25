@@ -6,10 +6,12 @@ require "csv_grouping/record_grouper"
 RSpec.describe CsvGrouping::RecordGrouper do
   subject(:grouped) do
     described_class.group(
-      rows: rows,
-      matcher: matcher,
-      email_columns: email_columns,
-      phone_columns: phone_columns
+      described_class::Request.new(
+        rows: rows,
+        matcher: matcher,
+        email_columns: email_columns,
+        phone_columns: phone_columns
+      )
     )
   end
 

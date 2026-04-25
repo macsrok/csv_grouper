@@ -45,13 +45,21 @@ module CsvGrouping
 
     def parser
       OptionParser.new do |opts|
-        add_value_option(opts, :input_path, "--input PATH")
-        add_value_option(opts, :matcher, "--matcher MATCHER")
-        add_value_option(opts, :output_dir, "--output-dir DIR", "--output_dir DIR")
-        add_value_option(opts, :email_column, "--email-column COLUMN", "--email_column COLUMN")
-        add_value_option(opts, :phone_column, "--phone-column COLUMN", "--phone_column COLUMN")
-        add_boolean_option(opts, :infer_column_names, "--infer-column-names VALUE", "--infer_column_names VALUE")
+        add_value_options(opts)
+        add_boolean_options(opts)
       end
+    end
+
+    def add_value_options(opts)
+      add_value_option(opts, :input_path, "--input PATH")
+      add_value_option(opts, :matcher, "--matcher MATCHER")
+      add_value_option(opts, :output_dir, "--output-dir DIR", "--output_dir DIR")
+      add_value_option(opts, :email_column, "--email-column COLUMN", "--email_column COLUMN")
+      add_value_option(opts, :phone_column, "--phone-column COLUMN", "--phone_column COLUMN")
+    end
+
+    def add_boolean_options(opts)
+      add_boolean_option(opts, :infer_column_names, "--infer-column-names VALUE", "--infer_column_names VALUE")
     end
 
     def add_value_option(opts, key, *names)
@@ -65,8 +73,8 @@ module CsvGrouping
     def validate
       matcher = @values[:matcher]
 
-      raise ValidationError, "input is required" if blank?(@values[:input_path])
-      raise ValidationError, "matcher is required" if blank?(matcher)
+      raise ValidationError, "input is required" if @values[:input_path].to_s.empty?
+      raise ValidationError, "matcher is required" if matcher.to_s.empty?
 
       return if RecordGrouper::MATCHERS.include?(matcher)
 
@@ -79,8 +87,5 @@ module CsvGrouping
       end
     end
 
-    def blank?(value)
-      value.to_s.empty?
-    end
   end
 end

@@ -22,12 +22,7 @@ module CsvGrouping
     end
 
     def call
-      options = CliOptions.parse(@argv)
-      table = CSV.read(options.input_path, headers: true)
-      output = build_output(options, table)
-
-      @stdout.write(output.preview)
-      0
+      run
     rescue ValidationError,
            UnknownColumnError,
            Errno::ENOENT,
@@ -38,25 +33,39 @@ module CsvGrouping
 
     private
 
-    def build_output(options, table)
-      headers = table.headers
-      columns = resolve_columns(options, headers)
+    def run
+      options = CliOptions.parse(@argv)
+      table = CSV.read(options.input_path, headers: true)
+      output = build_output(options, table)
 
+      @stdout.write(output.preview)
+      0
+    end
+
+    def build_output(options, table)
       CsvOutput.write(
-        input_path: options.input_path,
-        matcher: options.matcher,
-        headers: ["PersonId"] + headers,
-        rows: grouped_rows(options, table, columns),
-        output_dir: options.output_dir
+        CsvOutput::Request.new(
+          options: options,
+          headers: output_headers(table),
+          rows: grouped_rows(options, table)
+        )
       )
     end
 
-    def grouped_rows(options, table, columns)
+    def output_headers(table)
+      ["PersonId"] + table.headers
+    end
+
+    def grouped_rows(options, table)
+      columns = resolve_columns(options, table.headers)
+
       RecordGrouper.group(
-        rows: table.map(&:to_h),
-        matcher: options.matcher,
-        email_columns: columns.email_columns,
-        phone_columns: columns.phone_columns
+        RecordGrouper::Request.new(
+          rows: table.map(&:to_h),
+          matcher: options.matcher,
+          email_columns: columns.email_columns,
+          phone_columns: columns.phone_columns
+        )
       )
     end
 
