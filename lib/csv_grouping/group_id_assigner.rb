@@ -15,7 +15,9 @@ module CsvGrouping
     private
 
     def next_group_id
-      @next_id.to_s.tap { @next_id += 1 }
+      id = @next_id
+      @next_id += 1
+      id.to_s
     end
   end
 end
