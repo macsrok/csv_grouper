@@ -6,6 +6,7 @@ require "tmpdir"
 
 require "spec_helper"
 require "csv_grouping/application"
+require "csv_grouping/errors"
 
 RSpec.describe CsvGrouping::Application do
   subject(:status) { described_class.call(argv: argv, stdout: stdout, stderr: stderr) }

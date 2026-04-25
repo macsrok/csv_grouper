@@ -2,6 +2,7 @@
 
 require "optparse"
 
+require "csv_grouping/errors"
 require "csv_grouping/record_grouper"
 
 module CsvGrouping
@@ -22,9 +23,6 @@ module CsvGrouping
       :infer_column_names,
       keyword_init: true
     )
-
-    # Raised when CLI arguments are syntactically valid but unsupported.
-    class ValidationError < StandardError; end
 
     def self.parse(argv)
       new(argv).parse

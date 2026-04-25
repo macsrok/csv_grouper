@@ -5,6 +5,7 @@ require "csv"
 require "csv_grouping/cli_options"
 require "csv_grouping/column_resolver"
 require "csv_grouping/csv_output"
+require "csv_grouping/errors"
 require "csv_grouping/record_grouper"
 
 module CsvGrouping
@@ -27,8 +28,8 @@ module CsvGrouping
 
       @stdout.write(output.preview)
       0
-    rescue CliOptions::ValidationError,
-           ColumnResolver::UnknownColumnError,
+    rescue ValidationError,
+           UnknownColumnError,
            Errno::ENOENT,
            CSV::MalformedCSVError => error
       @stderr.puts("Error: #{error.message}")

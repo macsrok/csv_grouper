@@ -6,9 +6,6 @@ module CsvGrouping
     # Column lists selected for email and phone matching.
     Result = Struct.new(:email_columns, :phone_columns, keyword_init: true)
 
-    # Raised when a requested explicit column is absent from the CSV header.
-    class UnknownColumnError < StandardError; end
-
     def self.resolve(headers:, email_column:, phone_column:, infer_column_names:)
       new(headers, email_column, phone_column, infer_column_names).resolve
     end

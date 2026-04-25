@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "csv_grouping/column_resolver"
+require "csv_grouping/errors"
 
 RSpec.describe CsvGrouping::ColumnResolver do
   subject(:result) do
@@ -52,7 +53,7 @@ RSpec.describe CsvGrouping::ColumnResolver do
 
     it "raises a clear error" do
       expect { result }.to raise_error(
-        CsvGrouping::ColumnResolver::UnknownColumnError,
+        CsvGrouping::UnknownColumnError,
         /email column "missingEmail" was not found/
       )
     end
@@ -64,7 +65,7 @@ RSpec.describe CsvGrouping::ColumnResolver do
 
     it "raises a clear error" do
       expect { result }.to raise_error(
-        CsvGrouping::ColumnResolver::UnknownColumnError,
+        CsvGrouping::UnknownColumnError,
         /phone column "missingPhone" was not found/
       )
     end

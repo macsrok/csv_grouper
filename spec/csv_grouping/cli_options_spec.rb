@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "csv_grouping/cli_options"
+require "csv_grouping/errors"
 
 RSpec.describe CsvGrouping::CliOptions do
   subject(:options) { described_class.parse(argv) }
@@ -60,7 +61,7 @@ RSpec.describe CsvGrouping::CliOptions do
 
     it "raises a clear validation error" do
       expect { options }.to raise_error(
-        CsvGrouping::CliOptions::ValidationError,
+        CsvGrouping::ValidationError,
         /matcher must be one of same_email, same_phone, same_email_or_phone/
       )
     end
@@ -70,7 +71,7 @@ RSpec.describe CsvGrouping::CliOptions do
     let(:argv) { %w[--matcher same_email] }
 
     it "raises a clear validation error" do
-      expect { options }.to raise_error(CsvGrouping::CliOptions::ValidationError, /input is required/)
+      expect { options }.to raise_error(CsvGrouping::ValidationError, /input is required/)
     end
   end
 end
