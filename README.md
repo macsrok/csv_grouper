@@ -29,7 +29,7 @@ Optional options:
 - `--output-dir DIR`, `--output_dir DIR`: directory for the full output CSV. Defaults to `outputs/`.
 - `--email-column COLUMN`, `--email_column COLUMN`: use this email column instead of inferred email columns.
 - `--phone-column COLUMN`, `--phone_column COLUMN`: use this phone column instead of inferred phone columns.
-- `--infer-column-names true|false`, `--infer_column_names true|false`: when an explicit email or phone column is supplied, `true` also includes inferred columns for that match type. Without explicit columns, inference is on by default.
+- `--infer-column-names true|false`, `--infer_column_names true|false`: controls column inference. Defaults to `true`. When `true` and an explicit column is also provided, both the explicit and inferred columns are used. Pass `false` to use only the explicit column and skip inference entirely.
 - `-h`, `--help`: print help.
 
 Example:
@@ -61,11 +61,11 @@ By default, email and phone columns are inferred from header names.
 - Email columns: any header containing `email`, case-insensitively, such as `workEmail`, `email1`, `email2`, or `Email`.
 - Phone columns: any header containing `phone`, case-insensitively, such as `Phone`, `Phone1`, or `mobilePhone`.
 
-If `--email-column` is provided, only that column is used for email matching unless `--infer-column-names true` is also provided.
+If `--email-column` is provided, that column and any inferred email columns are both used (inference is on by default). Pass `--infer-column-names false` to use only the explicit column.
 
-If `--phone-column` is provided, only that column is used for phone matching unless `--infer-column-names true` is also provided.
+If `--phone-column` is provided, that column and any inferred phone columns are both used (inference is on by default). Pass `--infer-column-names false` to use only the explicit column.
 
-If no explicit column is provided for a match type, inferred columns are used by default for that type.
+If no explicit column is provided for a match type, inferred columns are used.
 
 If an explicit column does not exist in the CSV header, the Ruby application prints a clear validation error.
 
