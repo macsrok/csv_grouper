@@ -20,7 +20,8 @@
 - Create `lib/csv_grouping/application.rb`: coordinates parsing, grouping, writing, and preview output.
 - Create `lib/csv_grouping/cli_options.rb`: parses and validates Ruby CLI options.
 - Create `lib/csv_grouping/column_resolver.rb`: resolves inferred and explicit email/phone columns.
-- Create `lib/csv_grouping/record_grouper.rb`: applies matcher logic and assigns deterministic IDs.
+- Create `lib/csv_grouping/record.rb`: wraps a CSV row, normalizes values at creation time, and exposes matcher keys.
+- Create `lib/csv_grouping/record_grouper.rb`: groups records by matcher keys and assigns deterministic IDs.
 - Create `lib/csv_grouping/csv_output.rb`: writes full CSV and builds last-100 preview.
 - Create `lib/csv_grouping/version.rb`: application version constant.
 - Create `spec/spec_helper.rb`: common RSpec setup.
@@ -157,26 +158,28 @@ git commit -m "Add column resolution"
 ## Task 3: Record Grouping
 
 **Files:**
+- Create: `lib/csv_grouping/record.rb`
 - Create: `lib/csv_grouping/record_grouper.rb`
+- Test: `spec/csv_grouping/record_spec.rb`
 - Test: `spec/csv_grouping/record_grouper_spec.rb`
 
 - [ ] **Step 1: Write failing tests**
 
-Tests cover case-insensitive email matching, phone digit normalization, `same_email_or_phone` transitive grouping, blank values ignored, and deterministic IDs assigned by first group appearance.
+Tests cover record-level case-insensitive email normalization, phone digit normalization, matcher key extraction, blank values ignored, `same_email_or_phone` transitive grouping, and deterministic IDs assigned by first group appearance.
 
 - [ ] **Step 2: Verify red**
 
-Run: `rspec spec/csv_grouping/record_grouper_spec.rb`
+Run: `rspec spec/csv_grouping/record_spec.rb spec/csv_grouping/record_grouper_spec.rb`
 
-Expected: ERROR because `CsvGrouping::RecordGrouper` does not exist.
+Expected: ERROR because `CsvGrouping::Record` and `CsvGrouping::RecordGrouper` do not exist.
 
 - [ ] **Step 3: Implement minimal grouper**
 
-Implement union-find grouping over row indexes. Normalize email with `strip.downcase`; normalize phone by removing non-digits. Return rows prepended with `PersonId`.
+Implement `CsvGrouping::Record` so each instance wraps a row, normalizes email with `strip.downcase`, normalizes phone by removing non-digits, and exposes `keys_for(matcher)`. Implement union-find grouping over record indexes in `CsvGrouping::RecordGrouper`. Return rows prepended with `PersonId`.
 
 - [ ] **Step 4: Verify green**
 
-Run: `rspec spec/csv_grouping/record_grouper_spec.rb`
+Run: `rspec spec/csv_grouping/record_spec.rb spec/csv_grouping/record_grouper_spec.rb`
 
 Expected: PASS.
 
@@ -185,7 +188,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add lib/csv_grouping/record_grouper.rb spec/csv_grouping/record_grouper_spec.rb
+git add lib/csv_grouping/record.rb lib/csv_grouping/record_grouper.rb spec/csv_grouping/record_spec.rb spec/csv_grouping/record_grouper_spec.rb docs/superpowers/specs/2026-04-25-csv-grouping-design.md docs/superpowers/plans/2026-04-25-csv-grouping.md
 git commit -m "Add matcher-based record grouping"
 ```
 

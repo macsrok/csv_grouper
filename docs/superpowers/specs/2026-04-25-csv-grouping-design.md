@@ -65,7 +65,8 @@ The implementation uses small Ruby objects:
 
 - CLI option parser: parses arguments, validates matcher names and columns, and coordinates execution.
 - Column resolver: computes the email and phone columns from headers and explicit options.
-- Record grouper: normalizes matching values, builds connected groups with a union-find structure, and assigns deterministic person IDs.
+- Record: wraps one CSV row, normalizes email and phone values at creation time, and exposes matcher keys.
+- Record grouper: builds connected groups from record matcher keys with a union-find structure and assigns deterministic person IDs.
 - CSV writer: writes full output to disk and formats the stdout preview.
 
 The bash wrapper remains a thin launcher and does not duplicate Ruby validation logic beyond `--input`, `--matcher`, Ruby 4, and dependencies.
