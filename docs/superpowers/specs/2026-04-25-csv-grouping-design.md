@@ -72,7 +72,7 @@ The bash wrapper remains a thin launcher and does not duplicate Ruby validation 
 
 ## Testing
 
-Implementation uses TDD. Each behavioral slice starts with a failing test, then the smallest implementation to pass it, then cleanup while tests stay green.
+Implementation uses TDD with RSpec. Each behavioral slice starts with a failing spec, then the smallest implementation to pass it, then cleanup while specs stay green.
 
 Tests cover:
 

@@ -4,16 +4,17 @@
 
 **Goal:** Build a Ruby 4 CSV grouping CLI with a root bash wrapper, deterministic person IDs, matcher-based grouping, output files, stdout preview, tests, and user documentation.
 
-**Architecture:** A root `group_records` bash script performs only wrapper checks and delegates to `ruby -Ilib exe/group_records`. Ruby code is split into focused classes for option parsing, column resolution, grouping, and output writing. Minitest drives behavior with no third-party runtime dependencies beyond Bundler.
+**Architecture:** A root `group_records` bash script performs only wrapper checks and delegates to `ruby -Ilib exe/group_records`. Ruby code is split into focused classes for option parsing, column resolution, grouping, and output writing. RSpec drives behavior through focused specs.
 
-**Tech Stack:** Ruby 4, Bundler, stdlib `csv`, stdlib `optparse`, Minitest.
+**Tech Stack:** Ruby 4, Bundler, stdlib `csv`, stdlib `optparse`, RSpec.
 
 ---
 
 ## File Structure
 
-- Create `Gemfile`: declares Ruby 4 and uses Minitest for tests.
+- Create `Gemfile`: declares Ruby 4 and uses RSpec for tests.
 - Create `Rakefile`: exposes the test task.
+- Create `.rspec`: configures RSpec output.
 - Create `group_records`: root bash wrapper.
 - Create `exe/group_records`: Ruby executable entrypoint.
 - Create `lib/csv_grouping/application.rb`: coordinates parsing, grouping, writing, and preview output.
@@ -22,9 +23,9 @@
 - Create `lib/csv_grouping/record_grouper.rb`: applies matcher logic and assigns deterministic IDs.
 - Create `lib/csv_grouping/csv_output.rb`: writes full CSV and builds last-100 preview.
 - Create `lib/csv_grouping/version.rb`: application version constant.
-- Create `test/test_helper.rb`: common Minitest setup.
-- Create `test/csv_grouping/*_test.rb`: focused unit and integration tests.
-- Create `test/wrapper_test.rb`: wrapper behavior tests.
+- Create `spec/spec_helper.rb`: common RSpec setup.
+- Create `spec/csv_grouping/*_spec.rb`: focused unit and integration specs.
+- Create `spec/wrapper_spec.rb`: wrapper behavior specs.
 - Create `README.md`: usage, matchers, output, tests, AI process notes.
 
 ## Task 1: Project and Test Harness
@@ -32,39 +33,38 @@
 **Files:**
 - Create: `Gemfile`
 - Create: `Rakefile`
-- Create: `test/test_helper.rb`
+- Create: `.rspec`
+- Create: `spec/spec_helper.rb`
 - Create: `lib/csv_grouping/version.rb`
 
 - [ ] **Step 1: Write failing harness smoke test**
 
-Create `test/test_helper.rb`:
+Create `spec/spec_helper.rb`:
 
 ```ruby
 # frozen_string_literal: true
-
-require "minitest/autorun"
 
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 ```
 
-Create `test/version_test.rb`:
+Create `spec/version_spec.rb`:
 
 ```ruby
 # frozen_string_literal: true
 
-require "test_helper"
+require "spec_helper"
 require "csv_grouping/version"
 
-class VersionTest < Minitest::Test
-  def test_version_is_defined
-    refute_nil CsvGrouping::VERSION
+RSpec.describe CsvGrouping::VERSION do
+  it "is defined" do
+    expect(CsvGrouping::VERSION).not_to be_nil
   end
 end
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `ruby -Itest test/version_test.rb`
+Run: `rspec spec/version_spec.rb`
 
 Expected: FAIL or ERROR because `csv_grouping/version` does not exist.
 
@@ -79,7 +79,7 @@ source "https://rubygems.org"
 
 ruby ">= 4.0.0", "< 5.0"
 
-gem "minitest", "~> 5.25", group: :test
+gem "rspec", "~> 3.13", group: :test
 ```
 
 Create `Rakefile`:
@@ -87,14 +87,11 @@ Create `Rakefile`:
 ```ruby
 # frozen_string_literal: true
 
-require "rake/testtask"
+require "rspec/core/rake_task"
 
-Rake::TestTask.new(:test) do |task|
-  task.libs << "test"
-  task.pattern = "test/**/*_test.rb"
-end
+RSpec::Core::RakeTask.new(:spec)
 
-task default: :test
+task default: :spec
 ```
 
 Create `lib/csv_grouping/version.rb`:
@@ -109,7 +106,7 @@ end
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `ruby -Itest test/version_test.rb`
+Run: `rspec spec/version_spec.rb`
 
 Expected: PASS.
 
@@ -118,7 +115,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add Gemfile Rakefile test/test_helper.rb test/version_test.rb lib/csv_grouping/version.rb
+git add .rspec Gemfile Rakefile spec/spec_helper.rb spec/version_spec.rb lib/csv_grouping/version.rb docs/superpowers/specs/2026-04-25-csv-grouping-design.md docs/superpowers/plans/2026-04-25-csv-grouping.md
 git commit -m "Set up Ruby test harness"
 ```
 
@@ -126,7 +123,7 @@ git commit -m "Set up Ruby test harness"
 
 **Files:**
 - Create: `lib/csv_grouping/column_resolver.rb`
-- Test: `test/csv_grouping/column_resolver_test.rb`
+- Test: `spec/csv_grouping/column_resolver_spec.rb`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -134,7 +131,7 @@ Tests cover default inference, explicit override, explicit plus inferred columns
 
 - [ ] **Step 2: Verify red**
 
-Run: `ruby -Itest test/csv_grouping/column_resolver_test.rb`
+Run: `rspec spec/csv_grouping/column_resolver_spec.rb`
 
 Expected: ERROR because `CsvGrouping::ColumnResolver` does not exist.
 
@@ -144,7 +141,7 @@ Implement `CsvGrouping::ColumnResolver.resolve(headers:, email_column:, phone_co
 
 - [ ] **Step 4: Verify green**
 
-Run: `ruby -Itest test/csv_grouping/column_resolver_test.rb`
+Run: `rspec spec/csv_grouping/column_resolver_spec.rb`
 
 Expected: PASS.
 
@@ -153,7 +150,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add lib/csv_grouping/column_resolver.rb test/csv_grouping/column_resolver_test.rb
+git add lib/csv_grouping/column_resolver.rb spec/csv_grouping/column_resolver_spec.rb
 git commit -m "Add column resolution"
 ```
 
@@ -161,7 +158,7 @@ git commit -m "Add column resolution"
 
 **Files:**
 - Create: `lib/csv_grouping/record_grouper.rb`
-- Test: `test/csv_grouping/record_grouper_test.rb`
+- Test: `spec/csv_grouping/record_grouper_spec.rb`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -169,7 +166,7 @@ Tests cover case-insensitive email matching, phone digit normalization, `same_em
 
 - [ ] **Step 2: Verify red**
 
-Run: `ruby -Itest test/csv_grouping/record_grouper_test.rb`
+Run: `rspec spec/csv_grouping/record_grouper_spec.rb`
 
 Expected: ERROR because `CsvGrouping::RecordGrouper` does not exist.
 
@@ -179,7 +176,7 @@ Implement union-find grouping over row indexes. Normalize email with `strip.down
 
 - [ ] **Step 4: Verify green**
 
-Run: `ruby -Itest test/csv_grouping/record_grouper_test.rb`
+Run: `rspec spec/csv_grouping/record_grouper_spec.rb`
 
 Expected: PASS.
 
@@ -188,7 +185,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add lib/csv_grouping/record_grouper.rb test/csv_grouping/record_grouper_test.rb
+git add lib/csv_grouping/record_grouper.rb spec/csv_grouping/record_grouper_spec.rb
 git commit -m "Add matcher-based record grouping"
 ```
 
@@ -196,7 +193,7 @@ git commit -m "Add matcher-based record grouping"
 
 **Files:**
 - Create: `lib/csv_grouping/csv_output.rb`
-- Test: `test/csv_grouping/csv_output_test.rb`
+- Test: `spec/csv_grouping/csv_output_spec.rb`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -204,7 +201,7 @@ Tests cover writing the full file to the requested output directory, defaulting 
 
 - [ ] **Step 2: Verify red**
 
-Run: `ruby -Itest test/csv_grouping/csv_output_test.rb`
+Run: `rspec spec/csv_grouping/csv_output_spec.rb`
 
 Expected: ERROR because `CsvGrouping::CsvOutput` does not exist.
 
@@ -214,7 +211,7 @@ Use stdlib `CSV.generate` for preview text and `CSV.open` for file writes. Creat
 
 - [ ] **Step 4: Verify green**
 
-Run: `ruby -Itest test/csv_grouping/csv_output_test.rb`
+Run: `rspec spec/csv_grouping/csv_output_spec.rb`
 
 Expected: PASS.
 
@@ -223,7 +220,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add lib/csv_grouping/csv_output.rb test/csv_grouping/csv_output_test.rb
+git add lib/csv_grouping/csv_output.rb spec/csv_grouping/csv_output_spec.rb
 git commit -m "Add CSV output writer"
 ```
 
@@ -233,8 +230,8 @@ git commit -m "Add CSV output writer"
 - Create: `lib/csv_grouping/cli_options.rb`
 - Create: `lib/csv_grouping/application.rb`
 - Create: `exe/group_records`
-- Test: `test/csv_grouping/application_test.rb`
-- Test: `test/csv_grouping/cli_options_test.rb`
+- Test: `spec/csv_grouping/application_spec.rb`
+- Test: `spec/csv_grouping/cli_options_spec.rb`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -242,7 +239,7 @@ Tests cover required Ruby app options, invalid matcher handling, detailed help t
 
 - [ ] **Step 2: Verify red**
 
-Run: `ruby -Itest test/csv_grouping/cli_options_test.rb test/csv_grouping/application_test.rb`
+Run: `rspec spec/csv_grouping/cli_options_spec.rb spec/csv_grouping/application_spec.rb`
 
 Expected: ERROR because CLI and application classes do not exist.
 
@@ -252,7 +249,7 @@ Use `OptionParser` in `CliOptions`. Implement `Application.call(argv:, stdout:, 
 
 - [ ] **Step 4: Verify green**
 
-Run: `ruby -Itest test/csv_grouping/cli_options_test.rb test/csv_grouping/application_test.rb`
+Run: `rspec spec/csv_grouping/cli_options_spec.rb spec/csv_grouping/application_spec.rb`
 
 Expected: PASS.
 
@@ -261,7 +258,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add lib/csv_grouping/cli_options.rb lib/csv_grouping/application.rb exe/group_records test/csv_grouping/application_test.rb test/csv_grouping/cli_options_test.rb
+git add lib/csv_grouping/cli_options.rb lib/csv_grouping/application.rb exe/group_records spec/csv_grouping/application_spec.rb spec/csv_grouping/cli_options_spec.rb
 git commit -m "Add Ruby CLI application"
 ```
 
@@ -269,7 +266,7 @@ git commit -m "Add Ruby CLI application"
 
 **Files:**
 - Create: `group_records`
-- Test: `test/wrapper_test.rb`
+- Test: `spec/wrapper_spec.rb`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -277,7 +274,7 @@ Tests cover missing `--input`, missing `--matcher`, Ruby major version check, `b
 
 - [ ] **Step 2: Verify red**
 
-Run: `ruby -Itest test/wrapper_test.rb`
+Run: `rspec spec/wrapper_spec.rb`
 
 Expected: ERROR or FAIL because the root wrapper does not exist.
 
@@ -287,7 +284,7 @@ Implement bash argument scan, Ruby 4 check with `ruby -e`, Bundler dependency ch
 
 - [ ] **Step 4: Verify green**
 
-Run: `ruby -Itest test/wrapper_test.rb`
+Run: `rspec spec/wrapper_spec.rb`
 
 Expected: PASS.
 
@@ -296,7 +293,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add group_records test/wrapper_test.rb
+git add group_records spec/wrapper_spec.rb
 git commit -m "Add root bash wrapper"
 ```
 
@@ -311,7 +308,7 @@ Document installation, command examples, arguments, matcher semantics, output be
 
 - [ ] **Step 2: Run full test suite**
 
-Run: `bundle exec rake test`
+Run: `bundle exec rake spec`
 
 Expected: PASS.
 
