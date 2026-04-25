@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 module CsvGrouping
+  # Resolves the CSV columns used as email and phone match sources.
   class ColumnResolver
+    # Column lists selected for email and phone matching.
     Result = Struct.new(:email_columns, :phone_columns, keyword_init: true)
 
+    # Raised when a requested explicit column is absent from the CSV header.
     class UnknownColumnError < StandardError; end
 
     def self.resolve(headers:, email_column:, phone_column:, infer_column_names:)
@@ -28,17 +31,19 @@ module CsvGrouping
 
     def resolve_type(type, explicit_column)
       inferred = @headers.select { |header| header.downcase.include?(type) }
-      columns = []
+      return inferred if !explicit_column && @infer_column_names != false
+      return [] unless explicit_column
 
-      if explicit_column
-        raise_unknown_column(type, explicit_column) unless @headers.include?(explicit_column)
+      validate_explicit_column(type, explicit_column)
+      selected = [explicit_column]
+      selected.concat(inferred) if @infer_column_names == true
+      selected.uniq
+    end
 
-        columns << explicit_column
-      end
+    def validate_explicit_column(type, column)
+      return if @headers.include?(column)
 
-      columns.concat(inferred) if explicit_column && @infer_column_names == true
-      columns = inferred if explicit_column.nil? && @infer_column_names != false
-      columns.uniq
+      raise_unknown_column(type, column)
     end
 
     def raise_unknown_column(type, column)

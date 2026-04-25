@@ -3,6 +3,7 @@
 require "csv_grouping/record"
 
 module CsvGrouping
+  # Builds transitive person groups from each record's matcher keys.
   class RecordGrouper
     MATCHERS = %w[same_email same_phone same_email_or_phone].freeze
 
@@ -19,35 +20,50 @@ module CsvGrouping
     end
 
     def group
+      union_matching_records
+      assign_group_ids
+    end
+
+    private
+
+    def union_matching_records
       indexes_by_key.each_value do |indexes|
         first = indexes.first
         indexes.drop(1).each { |index| union(first, index) }
       end
+    end
 
+    def assign_group_ids
       group_ids = {}
       next_id = 1
 
       @records.each_with_index.map do |record, index|
         root = find(index)
-        group_ids[root] ||= next_id.to_s.tap { next_id += 1 }
-        { "PersonId" => group_ids[root] }.merge(record.row)
+        next_id = store_group_id(group_ids, root, next_id)
+        { "PersonId" => group_ids.fetch(root) }.merge(record.row)
       end
     end
 
-    private
+    def store_group_id(group_ids, root, next_id)
+      return next_id if group_ids.key?(root)
+
+      group_ids[root] = next_id.to_s
+      next_id + 1
+    end
 
     def indexes_by_key
-      @records.each_with_index.each_with_object({}) do |(record, index), keys|
+      @records.each_with_index.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |(record, index), keys|
         record.keys_for(@matcher).each do |key|
-          keys[key] ||= []
           keys[key] << index
         end
       end
     end
 
     def find(index)
-      @parents[index] = find(@parents[index]) unless @parents[index] == index
-      @parents[index]
+      parent = @parents[index]
+      return parent if parent == index
+
+      @parents[index] = find(parent)
     end
 
     def union(left, right)

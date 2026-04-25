@@ -2,3 +2,4 @@
 .worktrees/
 outputs/*.csv
 !outputs/.gitkeep
+tmp/

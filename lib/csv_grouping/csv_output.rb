@@ -4,7 +4,9 @@ require "csv"
 require "fileutils"
 
 module CsvGrouping
+  # Writes the complete grouped CSV and prepares the stdout preview.
   class CsvOutput
+    # File path and preview text produced by a CSV write operation.
     Result = Struct.new(:path, :preview, keyword_init: true)
 
     def self.write(input_path:, matcher:, headers:, rows:, output_dir:)
@@ -22,7 +24,7 @@ module CsvGrouping
     def write
       FileUtils.mkdir_p(resolved_output_dir)
       CSV.open(path, "w", write_headers: true, headers: @headers) do |csv|
-        @rows.each { |row| csv << @headers.map { |header| row[header] } }
+        @rows.each { |row| csv << row_values(row) }
       end
 
       Result.new(path: path, preview: preview)
@@ -45,8 +47,12 @@ module CsvGrouping
     def preview
       CSV.generate do |csv|
         csv << @headers
-        @rows.last(100).each { |row| csv << @headers.map { |header| row[header] } }
+        @rows.last(100).each { |row| csv << row_values(row) }
       end
+    end
+
+    def row_values(row)
+      @headers.map { |header| row[header] }
     end
   end
 end

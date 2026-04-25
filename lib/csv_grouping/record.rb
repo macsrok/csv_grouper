@@ -1,41 +1,45 @@
 # frozen_string_literal: true
 
 module CsvGrouping
+  # Wraps one CSV row and exposes pre-normalized matcher keys.
   class Record
+    MATCHER_KEY_READERS = {
+      "same_email" => :email_keys,
+      "same_phone" => :phone_keys,
+      "same_email_or_phone" => :all_keys
+    }.freeze
+
     attr_reader :row, :email_keys, :phone_keys
 
     def initialize(row, email_columns:, phone_columns:)
       @row = row
-      @email_keys = normalized_keys(row, email_columns, "email")
-      @phone_keys = normalized_keys(row, phone_columns, "phone")
+      @email_keys = email_columns.filter_map { |column| email_key(row[column]) }
+      @phone_keys = phone_columns.filter_map { |column| phone_key(row[column]) }
     end
 
     def keys_for(matcher)
-      case matcher
-      when "same_email"
-        email_keys
-      when "same_phone"
-        phone_keys
-      when "same_email_or_phone"
-        email_keys + phone_keys
-      else
-        []
-      end
+      reader = MATCHER_KEY_READERS.fetch(matcher, :empty_keys)
+      public_send(reader)
+    end
+
+    def all_keys
+      email_keys + phone_keys
+    end
+
+    def empty_keys
+      []
     end
 
     private
 
-    def normalized_keys(row, columns, type)
-      columns.filter_map do |column|
-        value = normalize(row[column], type)
-        "#{type}:#{value}" unless value.nil? || value.empty?
-      end
+    def email_key(value)
+      normalized = value.to_s.strip.downcase
+      "email:#{normalized}" unless normalized.empty?
     end
 
-    def normalize(value, type)
-      return nil if value.nil?
-
-      type == "email" ? value.strip.downcase : value.gsub(/\D/, "")
+    def phone_key(value)
+      normalized = value.to_s.gsub(/\D/, "")
+      "phone:#{normalized}" unless normalized.empty?
     end
   end
 end
