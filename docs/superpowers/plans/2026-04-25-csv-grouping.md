@@ -238,7 +238,7 @@ git commit -m "Add CSV output writer"
 
 - [ ] **Step 1: Write failing tests**
 
-Tests cover required Ruby app options, invalid matcher handling, detailed help text, successful end-to-end run against temp CSV input, explicit column behavior, and custom output directory behavior.
+Tests cover Ruby app option parsing, invalid matcher handling, successful end-to-end run against temp CSV input, explicit column behavior, and custom output directory behavior. Detailed help text is covered by wrapper specs in Task 6.
 
 - [ ] **Step 2: Verify red**
 
@@ -273,7 +273,7 @@ git commit -m "Add Ruby CLI application"
 
 - [ ] **Step 1: Write failing tests**
 
-Tests cover missing `--input`, missing `--matcher`, Ruby major version check, `bundle check` before execution, `bundle install` when gems are missing, and argument passthrough to `exe/group_records`.
+Tests cover `-h` / `--help`, missing `--input`, missing `--matcher`, Ruby major version check, `bundle check` before execution, `bundle install` when gems are missing, and argument passthrough to `exe/group_records`.
 
 - [ ] **Step 2: Verify red**
 
@@ -283,7 +283,7 @@ Expected: ERROR or FAIL because the root wrapper does not exist.
 
 - [ ] **Step 3: Implement minimal wrapper**
 
-Implement bash argument scan, Ruby 4 check with `ruby -e`, Bundler dependency check, and `exec ruby -Ilib exe/group_records "$@"`.
+Implement bash help text, argument scan, Ruby 4 check with `ruby -e`, Bundler dependency check, and `exec ruby -Ilib exe/group_records "$@"`.
 
 - [ ] **Step 4: Verify green**
 

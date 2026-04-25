@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+
+require "csv_grouping/application"
+
+exit CsvGrouping::Application.call(argv: ARGV, stdout: $stdout, stderr: $stderr)

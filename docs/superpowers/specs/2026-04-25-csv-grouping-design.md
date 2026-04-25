@@ -17,11 +17,12 @@ Example:
 The wrapper is intentionally small. It only:
 
 - Requires `--input` and `--matcher`; if either is missing, it prints an error and exits nonzero.
+- Prints the detailed help screen for `-h` or `--help` and exits zero before checking Ruby or Bundler.
 - Checks that `ruby` exists and has major version `4`; if not, it prints an error and exits nonzero.
 - Runs `bundle check`; if dependencies are missing, it runs `bundle install` automatically.
 - Delegates all remaining validation and execution to the Ruby application.
 
-The Ruby CLI owns full option parsing and provides a detailed `-h` / `--help` screen.
+The Ruby CLI owns execution option parsing and validation after the wrapper delegates.
 
 ## Matching
 
@@ -69,7 +70,7 @@ The implementation uses small Ruby objects:
 - Record grouper: builds connected groups from record matcher keys with a union-find structure and assigns deterministic person IDs.
 - CSV writer: writes full output to disk and formats the stdout preview.
 
-The bash wrapper remains a thin launcher and does not duplicate Ruby validation logic beyond `--input`, `--matcher`, Ruby 4, and dependencies.
+The bash wrapper remains a thin launcher and does not duplicate Ruby validation logic beyond help text, `--input`, `--matcher`, Ruby 4, and dependencies.
 
 ## Testing
 
@@ -86,7 +87,7 @@ Tests cover:
 - Explicit plus inferred column behavior when `--infer-column-names true` is passed.
 - Output file creation in the default and custom output directories.
 - Stdout preview containing the header and last 100 data rows.
-- Detailed help text.
+- Detailed wrapper help text.
 - Bash wrapper checks for required wrapper arguments, Ruby 4, and Bundler dependency installation.
 
 ## Documentation
