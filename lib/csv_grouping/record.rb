@@ -8,27 +8,21 @@ module CsvGrouping
       "same_phone" => :phone_keys,
       "same_email_or_phone" => :all_keys
     }.freeze
-    EMAIL_KEY = lambda do |value|
-      normalized = value.to_s.strip.downcase
-      "email:#{normalized}" unless normalized.empty?
-    end
-    PHONE_KEY = lambda do |value|
-      normalized = value.to_s.gsub(/\D/, "")
-      "phone:#{normalized}" unless normalized.empty?
-    end
 
     attr_reader :row, :email_keys, :phone_keys
 
     def initialize(row, email_columns:, phone_columns:)
       @row = row
-      @email_keys = normalized_keys(email_columns, EMAIL_KEY)
-      @phone_keys = normalized_keys(phone_columns, PHONE_KEY)
+      @email_keys = email_columns.filter_map { |col| email_key(row[col]) }
+      @phone_keys = phone_columns.filter_map { |col| phone_key(row[col]) }
     end
 
     def keys_for(matcher)
       reader = MATCHER_KEY_READERS.fetch(matcher, :empty_keys)
-      public_send(reader)
+      send(reader)
     end
+
+    private
 
     def all_keys
       email_keys + phone_keys
@@ -38,10 +32,14 @@ module CsvGrouping
       []
     end
 
-    private
+    def email_key(value)
+      normalized = value.to_s.strip.downcase
+      "email:#{normalized}" unless normalized.empty?
+    end
 
-    def normalized_keys(columns, normalizer)
-      columns.filter_map { |column| normalizer.call(row[column]) }
+    def phone_key(value)
+      normalized = value.to_s.gsub(/\D/, "")
+      "phone:#{normalized}" unless normalized.empty?
     end
   end
 end
