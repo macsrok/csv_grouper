@@ -62,7 +62,6 @@ RSpec.describe CsvGrouping::Application do
         "--input", input_path,
         "--matcher", "same_email",
         "--email-column", "workEmail",
-        "--infer-column-names", "false",
         "--output-dir", output_dir
       ]
     end
@@ -71,6 +70,32 @@ RSpec.describe CsvGrouping::Application do
     it "uses only the explicit email column" do
       expect(status).to eq(0)
       expect(output_rows.map { |row| row["PersonId"] }).to eq(%w[1 2])
+    end
+  end
+
+  context "with explicit email column plus inferred columns enabled" do
+    before do
+      CSV.open(input_path, "w") do |csv|
+        csv << %w[Name Email workEmail Phone]
+        csv << ["Jane", "shared@example.com", "jane@work.com", ""]
+        csv << ["Janet", "shared@example.com", "janet@work.com", ""]
+      end
+    end
+
+    let(:argv) do
+      [
+        "--input", input_path,
+        "--matcher", "same_email",
+        "--email-column", "workEmail",
+        "--infer-column-names", "true",
+        "--output-dir", output_dir
+      ]
+    end
+    let(:output_rows) { CSV.read(File.join(output_dir, "people_same_email.csv"), headers: true) }
+
+    it "uses the explicit email column and inferred email columns" do
+      expect(status).to eq(0)
+      expect(output_rows.map { |row| row["PersonId"] }).to eq(%w[1 1])
     end
   end
 

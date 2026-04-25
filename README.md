@@ -29,7 +29,7 @@ Optional options:
 - `--output-dir DIR`, `--output_dir DIR`: directory for the full output CSV. Defaults to `outputs/`.
 - `--email-column COLUMN`, `--email_column COLUMN`: use this email column instead of inferred email columns.
 - `--phone-column COLUMN`, `--phone_column COLUMN`: use this phone column instead of inferred phone columns.
-- `--infer-column-names true|false`, `--infer_column_names true|false`: include inferred email and phone columns. Defaults to `true`.
+- `--infer-column-names true|false`, `--infer_column_names true|false`: when an explicit email or phone column is supplied, `true` also includes inferred columns for that match type. Without explicit columns, inference is on by default.
 - `-h`, `--help`: print help.
 
 Example:
@@ -65,6 +65,8 @@ If `--email-column` is provided, only that column is used for email matching unl
 
 If `--phone-column` is provided, only that column is used for phone matching unless `--infer-column-names true` is also provided.
 
+If no explicit column is provided for a match type, inferred columns are used by default for that type.
+
 If an explicit column does not exist in the CSV header, the Ruby application prints a clear validation error.
 
 ## Output
@@ -98,6 +100,8 @@ bundle exec rspec spec/csv_grouping/record_grouper_spec.rb
 ## AI Process Notes
 
 I used ChatGPT/Codex as a pair-programming assistant. The main instructions were to use Superpowers, follow TDD, and commit at each major code addition. I directed it to build a Ruby 4 solution with a root bash wrapper, RSpec tests, deterministic IDs, column inference, explicit-column overrides, output files, and sample-data smoke tests.
+
+The full prompt and response transcript is available at `docs/session_exports/2026-04-25-csv-grouping-session.md`.
 
 Important course corrections:
 

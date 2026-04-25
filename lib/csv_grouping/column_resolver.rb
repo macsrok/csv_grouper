@@ -36,8 +36,8 @@ module CsvGrouping
         columns << explicit_column
       end
 
-      columns.concat(inferred) if @infer_column_names
-      columns = inferred if columns.empty? && explicit_column.nil?
+      columns.concat(inferred) if explicit_column && @infer_column_names == true
+      columns = inferred if explicit_column.nil? && @infer_column_names != false
       columns.uniq
     end
 

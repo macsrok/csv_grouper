@@ -15,7 +15,7 @@ RSpec.describe CsvGrouping::CliOptions do
       expect(options.output_dir).to be_nil
       expect(options.email_column).to be_nil
       expect(options.phone_column).to be_nil
-      expect(options.infer_column_names).to be(true)
+      expect(options.infer_column_names).to be_nil
     end
   end
 

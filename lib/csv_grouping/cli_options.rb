@@ -24,7 +24,7 @@ module CsvGrouping
 
     def initialize(argv)
       @argv = argv
-      @values = { infer_column_names: true }
+      @values = {}
     end
 
     def parse
