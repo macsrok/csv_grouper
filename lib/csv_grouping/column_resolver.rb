@@ -7,10 +7,10 @@ module CsvGrouping
     Result = Struct.new(:email_columns, :phone_columns, keyword_init: true)
 
     def self.resolve(headers:, email_column:, phone_column:, infer_column_names:)
-      new(headers, email_column, phone_column, infer_column_names).resolve
+      new(headers:, email_column:, phone_column:, infer_column_names:).resolve
     end
 
-    def initialize(headers, email_column, phone_column, infer_column_names)
+    def initialize(headers:, email_column:, phone_column:, infer_column_names:)
       @headers = headers
       @email_column = email_column
       @phone_column = phone_column
