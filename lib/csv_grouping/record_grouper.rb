@@ -8,7 +8,6 @@ module CsvGrouping
   # Builds transitive person groups from each record's matcher keys.
   class RecordGrouper
     MATCHERS = %w[same_email same_phone same_email_or_phone].freeze
-    EMPTY_KEY_INDEX = -> { Hash.new { |hash, key| hash[key] = [] } }
 
     # Values needed to build person groups from CSV rows.
     Request = Struct.new(:rows, :matcher, :email_columns, :phone_columns, keyword_init: true)
@@ -52,7 +51,7 @@ module CsvGrouping
     end
 
     def indexes_by_key
-      keys = EMPTY_KEY_INDEX.call
+      keys = Hash.new { |hash, key| hash[key] = [] }
 
       @records.each_with_index do |record, index|
         store_record_keys(keys, record, index)
