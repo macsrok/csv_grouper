@@ -3,25 +3,11 @@
 require "csv"
 require "fileutils"
 
-require "csv_grouping/output_path"
-
 module CsvGrouping
   # Writes the complete grouped CSV and prepares the stdout preview.
   class CsvOutput
     # Values needed to write one grouped CSV output.
-    Request = Struct.new(:options, :headers, :rows, keyword_init: true) do
-      def input_path
-        options.input_path
-      end
-
-      def matcher
-        options.matcher
-      end
-
-      def output_dir
-        options.output_dir
-      end
-    end
+    Request = Struct.new(:options, :headers, :rows, keyword_init: true)
 
     # File path and preview text produced by a CSV write operation.
     Result = Struct.new(:path, :preview, keyword_init: true)
@@ -46,7 +32,12 @@ module CsvGrouping
     attr_reader :request
 
     def path
-      @path ||= OutputPath.build(request)
+      @path ||= begin
+        opts = request.options
+        dir = File.expand_path(opts.output_dir || "outputs")
+        base = File.basename(opts.input_path, File.extname(opts.input_path))
+        File.join(dir, "#{base}_#{opts.matcher}.csv")
+      end
     end
 
     def preview
