@@ -8,10 +8,17 @@ module CsvGrouping
     end
 
     def find(index)
-      parent = @parents[index]
-      return parent if parent == index
+      root = index
+      root = @parents[root] until @parents[root] == root
 
-      @parents[index] = find(parent)
+      current = index
+      while current != root
+        next_node = @parents[current]
+        @parents[current] = root
+        current = next_node
+      end
+
+      root
     end
 
     def union(left, right)
