@@ -20,8 +20,8 @@ Options:
   --phone-column COLUMN, --phone_column COLUMN
                                      Phone column to use instead of inferred phone columns.
   --infer-column-names true|false, --infer_column_names true|false
-                                     With explicit columns, true also includes inferred columns.
-                                     Without explicit columns, inference is on by default.
+                                     Controls column inference. Defaults to true.
+                                     Pass false to use only the explicit column.
   -h, --help                         Show this help.
 
 Output:
