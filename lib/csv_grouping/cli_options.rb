@@ -3,11 +3,12 @@
 require "optparse"
 
 require "csv_grouping/errors"
-require "csv_grouping/record_grouper"
 
 module CsvGrouping
   # Parses and validates command-line options after the shell wrapper delegates.
   class CliOptions
+    MATCHERS = %w[same_email same_phone same_email_or_phone].freeze
+
     BOOLEAN_VALUES = {
       "true" => true,
       "false" => false
@@ -76,9 +77,11 @@ module CsvGrouping
       raise ValidationError, "input is required" if @values[:input_path].to_s.empty?
       raise ValidationError, "matcher is required" if matcher.to_s.empty?
 
-      return if RecordGrouper::MATCHERS.include?(matcher)
+      unless MATCHERS.include?(matcher)
+        raise ValidationError, "matcher must be one of #{MATCHERS.join(', ')}"
+      end
 
-      raise ValidationError, "matcher must be one of #{RecordGrouper::MATCHERS.join(', ')}"
+      @values[:infer_column_names] = true if @values[:infer_column_names].nil?
     end
 
     def parse_boolean(value)
@@ -86,6 +89,5 @@ module CsvGrouping
         raise ValidationError, "infer-column-names must be true or false"
       end
     end
-
   end
 end

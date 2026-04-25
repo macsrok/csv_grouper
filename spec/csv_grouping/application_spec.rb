@@ -63,6 +63,7 @@ RSpec.describe CsvGrouping::Application do
         "--input", input_path,
         "--matcher", "same_email",
         "--email-column", "workEmail",
+        "--infer-column-names", "false",
         "--output-dir", output_dir
       ]
     end
