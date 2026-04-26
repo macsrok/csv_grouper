@@ -38,7 +38,7 @@ module CsvGrouping
     end
 
     def phone_key(value)
-      normalized = value.to_s.gsub(/\D/, "")
+      normalized = value.to_s.gsub(/\D/, "").sub(/\A1(\d{10})\z/, '\1')
       "phone:#{normalized}" unless normalized.empty?
     end
   end

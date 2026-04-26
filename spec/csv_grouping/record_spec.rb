@@ -26,6 +26,12 @@ RSpec.describe CsvGrouping::Record do
     expect(record.phone_keys).to eq(%w[phone:5551234567 phone:5559876543])
   end
 
+  it "strips a leading country code 1 from 11-digit phone numbers" do
+    row = { "Phone" => "14441234567", "OtherPhone" => "+1 (555) 123-4567" }
+    record = described_class.new(row, email_columns: [], phone_columns: %w[Phone OtherPhone])
+    expect(record.phone_keys).to eq(%w[phone:4441234567 phone:5551234567])
+  end
+
   context "with blank values" do
     let(:row) { { "Email" => " ", "Phone" => nil } }
     let(:phone_columns) { ["Phone"] }
