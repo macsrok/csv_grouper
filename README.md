@@ -97,6 +97,30 @@ Run a specific spec:
 bundle exec rspec spec/csv_grouping/record_grouper_spec.rb
 ```
 
+## Known Limitations
+
+These are deliberate trade-offs, not undiscovered bugs. Each is documented here so the next person reading the code knows what is and isn't handled.
+
+### Phone normalisation handles NANP only
+
+The phone normaliser strips non-digits and removes a leading `1` from 11-digit numbers — the North American Numbering Plan format. Numbers from other regions are not normalised by locale, so `+44 20 7946 0958` and `020 7946 0958` produce different keys and would not be matched even though they're the same number. For multi-region support, swap the regex in `Record#phone_key` for a library such as `phonelib`/`libphonenumber` that can parse and normalise by locale.
+
+### The CSV is loaded fully into memory
+
+`Application` calls `CSV.read`, which loads the entire input into memory before grouping. The 20K-row sample file is fine; a 50M-row file would not be. For larger inputs the read should be replaced with `CSV.foreach` and the grouper updated to process records in batches while persisting the union-find state and a global row offset across batches.
+
+### Email normalisation is exact-match after lowercase + strip
+
+`Record#email_key` lowercases and strips whitespace but does no further normalisation. It will not match Gmail dot-equivalence (`john.doe@gmail.com` vs `johndoe@gmail.com`), plus-aliases (`john+spam@gmail.com` vs `john@gmail.com`), or any typo/alias variation. This is appropriate for the assignment but would need to be revisited for a real-world CRM-quality matcher.
+
+### PersonId values depend on row order
+
+IDs are assigned by first-seen group root, so the *groupings* are stable across reruns but the specific PersonId numbers are not stable if the input rows are reordered. If downstream systems need to join on PersonId across re-runs with potentially different row order, the IDs should be derived from the matching key (e.g. a hash of the smallest member's normalised key) rather than from iteration order.
+
+### Help text lives in two places
+
+The bash wrapper has its own `-h` help text duplicated from the option definitions in `CliOptions`. If a new option is added on the Ruby side without updating the wrapper, the help text will lie about what's available. The wrapper test (`spec/wrapper_spec.rb`) verifies the help text contains specific strings but does not cross-reference Ruby's option list.
+
 ## AI Process Notes
 
 I used ChatGPT/Codex as a pair-programming assistant. The main instructions were to use Superpowers, follow TDD, and commit at each major code addition. I directed it to build a Ruby 4 solution with a root bash wrapper, RSpec tests, deterministic IDs, column inference, explicit-column overrides, output files, and sample-data smoke tests.
