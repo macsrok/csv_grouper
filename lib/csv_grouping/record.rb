@@ -38,10 +38,11 @@ module CsvGrouping
     end
 
     def phone_key(value)
-      # Strips the North American country code (1) from 11-digit numbers so that
-      # "14441234567" and "4441234567" match. Only handles NANP (+1); to support
-      # other regions, replace this with a library like phonelib/libphonenumber
-      # that can parse and normalise numbers by locale.
+      # Strips the North American country code (1) from 11-digit numbers so
+      # "14441234567" and "4441234567" match. Anchored to exactly 11 digits
+      # so a 10-digit number that happens to start with 1 (e.g. "1234567890")
+      # is left alone. Only handles NANP (+1); for multi-region support, swap
+      # in phonelib/libphonenumber to parse and normalise numbers by locale.
       normalized = value.to_s.gsub(/\D/, "").sub(/\A1(\d{10})\z/, '\1')
       "phone:#{normalized}" unless normalized.empty?
     end

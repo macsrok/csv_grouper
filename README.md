@@ -138,3 +138,11 @@ All normalization and key extraction should happen there.
 ```text
 Do not use var = val; use let and context blocks.
 ```
+
+### Second pass — Claude as code reviewer
+
+After the initial build, I did a second pass with Claude playing the role of a hiring-manager-style reviewer. It identified 12 Ruby best-practice issues across the codebase: lambda constants used to hold behaviour rather than values, public methods that should have been private, a cross-layer coupling between `CliOptions` and `RecordGrouper`, a `tap`-based mutation in `GroupIdAssigner`, an over-engineered `OutputPath` class wrapping three string operations, a `CsvOutput::Request` struct with proxy methods that just delegated to `options`, and a recursive `UnionFind#find` that could overflow the stack on large inputs. I worked through the fixes task by task using subagent-driven development with spec-compliance and code-quality review after each change.
+
+The same pass surfaced a real correctness bug: the phone normaliser stripped non-digits but did nothing about country codes, which silently caused row 5 (`14441234567`) to fail to match row 2 (`444.123.4567`) in `input1.csv`. I added a regex that strips a leading `1` from exactly 11-digit numbers, scoped the fix to NANP in a code comment, and added a regression test.
+
+Other additions in the second pass: unit specs for `UnionFind` and `GroupIdAssigner` (which previously had only indirect coverage), SimpleCov with a 90% minimum coverage gate, README and `-h` help-text updates to reflect the `infer_column_names` default change, and verification that all three sample files produce correct groupings under all three matchers.
